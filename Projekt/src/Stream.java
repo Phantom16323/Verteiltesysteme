@@ -148,7 +148,7 @@ abstract class Stream<A> {
     }
 
     public static Stream<Integer> from(int i) {
-        return cons(() -> i, () -> from(i + 1));
+        return iterate(i, x -> x + 1);
     }
 
     public List<A> toList() {
@@ -184,8 +184,8 @@ abstract class Stream<A> {
 
     /**
      * This method traverses the stream until an element is found satisfying the predicate p.
-     * @param p a function returning a bool
      *
+     * @param p a function returning a bool
      */
     public boolean exists(Function<A, Boolean> p) {
         return exists(this, p).eval();
@@ -199,10 +199,26 @@ abstract class Stream<A> {
 
     /**
      * This method takes a object as its parameter and returns an infinite stream of the same object.
+     *
      * @param a the repeated object
      * @return an infinite stream consisting of the object
      */
     public static <A> Stream<A> repeat(A a) {
-        return cons(() -> a, () -> repeat(a));
+        return iterate(a, x -> x);
     }
+
+    /**
+     * This method takes two parameters
+     * the seed, which is used as the first value,
+     * and a function which will compute the next one.
+     * @param seed the first value
+     * @param f the function which generates the next value
+     * @return a stream based on the seed and function
+     */
+    public static <A> Stream<A> iterate(A seed, Function<A, A> f) {
+        return cons(() -> seed, () -> iterate(f.apply(seed), f));
+    }
+
+
+
 }
