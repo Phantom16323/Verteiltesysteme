@@ -15,6 +15,7 @@ abstract class Stream<A> {
      * Returns the first n elements of a stream.
      * Beware, this method must be called on the stream
      * before converting it to a list
+     *
      * @param n number of elements
      * @return a stream with the corresponding number of elements
      */
@@ -22,6 +23,7 @@ abstract class Stream<A> {
 
     /**
      * Returns the remaining stream after removing the first n elements.
+     *
      * @param n number of elements
      * @return a stream withe the remaining elements
      */
@@ -30,9 +32,11 @@ abstract class Stream<A> {
     /**
      * Returns a stream containing all starting
      * elements as long as a condition is matched
+     *
      * @param p a function returning a bool
      */
     public abstract Stream<A> takeWhile(Function<A, Boolean> p);
+
 
     private Stream() {
     }
@@ -126,7 +130,7 @@ abstract class Stream<A> {
 
         @Override
         public Stream<A> takeWhile(Function<A, Boolean> p) {
-            return p.apply(head()) ? cons(head, ()-> tail().takeWhile(p)) : empty();
+            return p.apply(head()) ? cons(head, () -> tail().takeWhile(p)) : empty();
         }
     }
 
@@ -159,5 +163,21 @@ abstract class Stream<A> {
         return n <= 0
                 ? TailCall.ret(acc)
                 : TailCall.sus(() -> drop(acc.tail(), n - 1));
+    }
+
+    /**
+     * Returns a stream with the front elements removed as
+     * long as they satisfy a condition
+     * @param p a function returning a bool
+     */
+    public Stream<A> dropWhile(Function<A, Boolean> p) {
+        return dropWhile(this, p).eval();
+    }
+
+    private TailCall<Stream<A>> dropWhile(Stream<A> acc,
+                                          Function<A, Boolean> p) {
+        return acc.isEmpty()
+                ? TailCall.ret(acc) : p.apply(acc.head()) ? TailCall.sus(() -> dropWhile(acc.tail(), p))
+                : TailCall.ret(acc);
     }
 }
