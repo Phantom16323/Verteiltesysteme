@@ -186,6 +186,10 @@ public abstract class List<A> {
         public Result<A> find(Function<A, Boolean> p) {
             return Result.empty();
         }
+
+        public void forEach(Effect<A> ef) {
+        // Do nothing
+        }
     }
 
     // ----------------------------------------------------------------------Cons
@@ -322,6 +326,19 @@ public abstract class List<A> {
         @Override
         public Result<A> find(Function<A, Boolean> p) {
             return p.apply(this.head) ? this.headOption() : this.tail.find(p);
+        }
+
+        public void forEach(Effect<A> ef) {
+            forEach(this, ef).eval();
+        }
+
+        private static <A> TailCall<List<A>> forEach(List<A> list, Effect<A> ef) {
+            return list.isEmpty()
+                    ? TailCall.ret(list)
+                    : TailCall.sus(() -> {
+                ef.apply(list.head());
+                return forEach(list.tail(), ef);
+            });
         }
     }
     // ---------------------------------------------------------------------List
