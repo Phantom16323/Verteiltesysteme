@@ -27,6 +27,13 @@ abstract class Stream<A> {
      */
     public abstract Stream<A> drop(int n);
 
+    /**
+     * Returns a stream containing all starting
+     * elements as long as a condition is matched
+     * @param p a function returning a bool
+     */
+    public abstract Stream<A> takeWhile(Function<A, Boolean> p);
+
     private Stream() {
     }
 
@@ -58,6 +65,11 @@ abstract class Stream<A> {
 
         @Override
         public Stream<A> drop(int n) {
+            return this;
+        }
+
+        @Override
+        public Stream<A> takeWhile(Function<A, Boolean> p) {
             return this;
         }
     }
@@ -110,6 +122,11 @@ abstract class Stream<A> {
         @Override
         public Stream<A> drop(int n) {
             return drop(this, n).eval();
+        }
+
+        @Override
+        public Stream<A> takeWhile(Function<A, Boolean> p) {
+            return p.apply(head()) ? cons(head, ()-> tail().takeWhile(p)) : empty();
         }
     }
 
