@@ -168,6 +168,7 @@ abstract class Stream<A> {
     /**
      * Returns a stream with the front elements removed as
      * long as they satisfy a condition
+     *
      * @param p a function returning a bool
      */
     public Stream<A> dropWhile(Function<A, Boolean> p) {
@@ -179,5 +180,29 @@ abstract class Stream<A> {
         return acc.isEmpty()
                 ? TailCall.ret(acc) : p.apply(acc.head()) ? TailCall.sus(() -> dropWhile(acc.tail(), p))
                 : TailCall.ret(acc);
+    }
+
+    /**
+     * This method traverses the stream until an element is found satisfying the predicate p.
+     * @param p a function returning a bool
+     *
+     */
+    public boolean exists(Function<A, Boolean> p) {
+        return exists(this, p).eval();
+    }
+
+    private TailCall<Boolean> exists(Stream<A> s, Function<A, Boolean> p) {
+        return s.isEmpty()
+                ? TailCall.ret(false) : p.apply(s.head()) ? TailCall.ret(true)
+                : TailCall.sus(() -> exists(s.tail(), p));
+    }
+
+    /**
+     * This method takes a object as its parameter and returns an infinite stream of the same object.
+     * @param a the repeated object
+     * @return an infinite stream consisting of the object
+     */
+    public static <A> Stream<A> repeat(A a) {
+        return cons(() -> a, () -> repeat(a));
     }
 }
