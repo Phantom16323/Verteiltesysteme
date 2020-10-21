@@ -63,6 +63,10 @@ public abstract class Result<V> implements Serializable {
         public boolean equals(Object o) {
             return this == o || o instanceof Empty;
         }
+
+        public Result<String> forEachOrFail(Effect<V> c) {
+            return empty();
+        }
     }
 
     private static class Failure<V> extends Result<V> {
@@ -107,6 +111,14 @@ public abstract class Result<V> implements Serializable {
         public <U> Result<U> map(Function<V, U> f) {
             return failure(exception);
         }
+
+        public Result<String> forEachOrFail(Effect<V> c) {
+            return success(exception.getMessage());
+        }
+        public Result<RuntimeException> forEachOrException(Effect<V> c) {
+            return success(exception);
+        }
+
     }
 
     private static class Success<V> extends Result<V> {
@@ -140,6 +152,11 @@ public abstract class Result<V> implements Serializable {
         @Override
         public <U> Result<U> map(Function<V, U> f) {
             return success(f.apply(value));
+        }
+
+        public Result<String> forEachOrFail(Effect<V> e) {
+            e.apply(this.value);
+            return empty();
         }
     }
 
